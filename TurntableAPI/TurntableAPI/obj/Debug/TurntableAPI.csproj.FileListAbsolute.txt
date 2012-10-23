@@ -1,7 +1,0 @@
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\TurntableAPI\TurntableAPI\bin\Debug\TurntableAPI.dll
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\TurntableAPI\TurntableAPI\bin\Debug\TurntableAPI.pdb
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\TurntableAPI\TurntableAPI\bin\Debug\websocket-sharp.dll
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\TurntableAPI\TurntableAPI\bin\Debug\websocket-sharp.pdb
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\TurntableAPI\TurntableAPI\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\TurntableAPI\TurntableAPI\obj\Debug\TurntableAPI.dll
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\TurntableAPI\TurntableAPI\obj\Debug\TurntableAPI.pdb

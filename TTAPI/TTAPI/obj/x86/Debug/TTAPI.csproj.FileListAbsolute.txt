@@ -1,0 +1,8 @@
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\obj\x86\Debug\ResolveAssemblyReference.cache
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\bin\Debug\TTAPI.dll.config
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\bin\Debug\TTAPI.dll
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\bin\Debug\TTAPI.pdb
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\bin\Debug\websocket-sharp.dll
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\bin\Debug\websocket-sharp.pdb
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\obj\x86\Debug\TTAPI.dll
+Y:\GitHub\Turntable-API.NET\TTAPI\TTAPI\obj\x86\Debug\TTAPI.pdb

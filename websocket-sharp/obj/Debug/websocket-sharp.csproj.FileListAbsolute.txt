@@ -3,8 +3,18 @@ C:\Users\Inumedia\Documents\Visual Studio 2010\Projects\TTCloudBots\websocket-sh
 C:\Users\Inumedia\Documents\Visual Studio 2010\Projects\TTCloudBots\websocket-sharp\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\Inumedia\Documents\Visual Studio 2010\Projects\TTCloudBots\websocket-sharp\obj\Debug\websocket-sharp.dll
 C:\Users\Inumedia\Documents\Visual Studio 2010\Projects\TTCloudBots\websocket-sharp\obj\Debug\websocket-sharp.pdb
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\websocket-sharp\bin\Debug\websocket-sharp.dll
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\websocket-sharp\bin\Debug\websocket-sharp.pdb
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.dll
-C:\Users\Inumedia\Documents\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.pdb
+D:\Projects\TTCloudBots\websocket-sharp\bin\Debug\websocket-sharp.dll
+D:\Projects\TTCloudBots\websocket-sharp\bin\Debug\websocket-sharp.pdb
+D:\Projects\TTCloudBots\websocket-sharp\obj\Debug\ResolveAssemblyReference.cache
+D:\Projects\TTCloudBots\websocket-sharp\obj\Debug\websocket-sharp.dll
+D:\Projects\TTCloudBots\websocket-sharp\obj\Debug\websocket-sharp.pdb
+D:\Projects\TTWin8Testing\websocket-sharp\bin\Debug\websocket-sharp.dll
+D:\Projects\TTWin8Testing\websocket-sharp\bin\Debug\websocket-sharp.pdb
+D:\Projects\TTWin8Testing\websocket-sharp\obj\Debug\ResolveAssemblyReference.cache
+D:\Projects\TTWin8Testing\websocket-sharp\obj\Debug\websocket-sharp.dll
+D:\Projects\TTWin8Testing\websocket-sharp\obj\Debug\websocket-sharp.pdb
+Y:\GitHub\Turntable-API.NET\websocket-sharp\bin\Debug\websocket-sharp.dll
+Y:\GitHub\Turntable-API.NET\websocket-sharp\bin\Debug\websocket-sharp.pdb
+Y:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\ResolveAssemblyReference.cache
+Y:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.dll
+Y:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.pdb
