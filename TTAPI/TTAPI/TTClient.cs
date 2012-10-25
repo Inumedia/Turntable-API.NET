@@ -22,8 +22,8 @@ namespace TTAPI
         WebClient webClient;
         public Dictionary<string, Handler> specifiedHandlers;
         public bool isConnected { get { return webSocket.ReadyState == WsState.OPEN; } }
-        DateTime lastHeartbeat;
-        DateTime lastActivity;
+        public DateTime lastHeartbeat;
+        public DateTime lastActivity;
         Dictionary<int, HandlerAndSource> messageCallbacks;
         public DateTime syncTime { get; protected set; }
 
