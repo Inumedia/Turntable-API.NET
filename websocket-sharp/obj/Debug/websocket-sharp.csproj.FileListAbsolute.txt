@@ -18,3 +18,8 @@ Y:\GitHub\Turntable-API.NET\websocket-sharp\bin\Debug\websocket-sharp.pdb
 Y:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\ResolveAssemblyReference.cache
 Y:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.dll
 Y:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.pdb
+Z:\GitHub\Turntable-API.NET\websocket-sharp\bin\Debug\websocket-sharp.dll
+Z:\GitHub\Turntable-API.NET\websocket-sharp\bin\Debug\websocket-sharp.pdb
+Z:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\ResolveAssemblyReference.cache
+Z:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.dll
+Z:\GitHub\Turntable-API.NET\websocket-sharp\obj\Debug\websocket-sharp.pdb

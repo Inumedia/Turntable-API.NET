@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using TTAPI.Recv;
 
 namespace TTAPI
 {
-    public class User
+    public class User : Command
     {
         public string name,
                       userid,
@@ -27,10 +25,27 @@ namespace TTAPI
         }
     }
 
+    public class UserProfile : User
+    {
+        public string about, website, topartists, hangout;
+    }
+
     public enum ACL
     {
         User = 0,
         SuperUser = 1,
         GateKeeper = 2
+    }
+
+    public class AvatarRequirements
+    {
+        public int[] avatarids;
+        public int min;
+        public int acl;
+    }
+
+    public class UserPresence
+    {
+        public string status, userid;
     }
 }

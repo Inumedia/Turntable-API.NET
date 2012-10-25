@@ -12,6 +12,7 @@ namespace TTAPI
                       djname,
                       sourceid,
                       source;
+        public bool snaggable;
         public double score;
         public double starttime;
         public SongMetadata metadata;

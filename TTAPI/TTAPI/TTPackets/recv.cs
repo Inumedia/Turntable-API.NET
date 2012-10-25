@@ -231,4 +231,24 @@ namespace TTAPI.Recv
         public string text, userid, senderid, command;
         public double time;
     }
+
+    public class AvatarList : Command
+    {
+        public AvatarRequirements[] avatars;
+    }
+
+    public class Presence : Command
+    {
+        public UserPresence presence;
+    }
+
+    public class UserID : Command
+    {
+        // Again with the nothing to do.  I just like strong typing this. :D
+    }
+
+    public class Playlist : Command
+    {
+        public Song[] list;
+    }
 }

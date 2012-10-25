@@ -114,9 +114,9 @@ namespace TTAPI
         {
             this.currentStatus = "available";
             this.clientId = String.Format("{0}-0.59633534294921572", DateTime.Now.ToBinary().ToString());
-            Select_Server();
             try
             {
+                Select_Server();
                 webSocket = new WebSocket(String.Format("ws://{0}:{1}/socket.io/websocket", serverInformation.Address, serverInformation.Port));
             }
             catch (WebException)
@@ -322,6 +322,38 @@ namespace TTAPI
         {
             Send(new APICall("room.rem_favorite", roomId), callback);
         }
+        public void RoomList(int skipper = 0, Handler<Rooms> callback = null)
+        {
+            Send(new ListRooms(skipper), callback);
+        }
+        public void RoomGraph(Handler<Rooms> callback = null)
+        {
+            Send(new APICall("room.directory_graph"), callback);
+        }
+        public void UserInfo(Handler<User> callback)
+        {
+            Send(new APICall("user.info"), callback);
+        }
+        public void AvailableAvatars(Handler<AvatarList> callback)
+        {
+            Send(new APICall("user.available_avatars"), callback);
+        }
+        public void GetProfile(string userid = null, Handler<UserProfile> callback = null)
+        {
+            Send(new GetProfile(userid), callback);
+        }
+        public void GetPresence(string userid = null, Handler<Presence> callback = null)
+        {
+            Send(new GetPresence(userid), callback);
+        }
+        public void GetUserID(string username = null, Handler<UserID> callback = null)
+        {
+            Send(new GetUserID(username), callback);
+        }
+        public void GetPlaylsit(string playlistName = "default", bool minimal = false, Handler<Playlist> callback = null)
+        {
+            Send(new GetPlaylist(playlistName, minimal), callback);
+        }
 
         public void SetStatus(string status)
         {
@@ -329,7 +361,7 @@ namespace TTAPI
             UpdatePresence();
         }
 
-        public void Send<T>(APICall message, Handler<T> callback, bool needsProcessing = true) where T : Command
+        public void Send<T>(IAPICall message, Handler<T> callback, bool needsProcessing = true) where T : Command
         {
             if (message.HandlerSerializeTo == null)
             {
@@ -344,7 +376,7 @@ namespace TTAPI
             }), needsProcessing);
         }
 
-        public void Send(APICall message, Handler callback = null, bool needsProcessing = true)
+        public void Send(IAPICall message, Handler callback = null, bool needsProcessing = true)
         {
             if (needsProcessing)
             {
@@ -437,9 +469,9 @@ namespace TTAPI
     public class HandlerAndSource
     {
         public Handler handler;
-        public APICall source;
+        public IAPICall source;
 
-        public HandlerAndSource(Handler handle, APICall callingSource)
+        public HandlerAndSource(Handler handle, IAPICall callingSource)
         {
             handler = handle;
             source = callingSource;
