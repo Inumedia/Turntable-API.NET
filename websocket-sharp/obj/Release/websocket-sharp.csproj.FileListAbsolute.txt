@@ -1,6 +1,0 @@
-C:\Users\Inumedia\Documents\Visual Studio 2010\Projects\TTCloudBots\websocket-sharp\bin\Release\websocket-sharp.dll
-C:\Users\Inumedia\Documents\Visual Studio 2010\Projects\TTCloudBots\websocket-sharp\obj\Release\ResolveAssemblyReference.cache
-C:\Users\Inumedia\Documents\Visual Studio 2010\Projects\TTCloudBots\websocket-sharp\obj\Release\websocket-sharp.dll
-D:\Projects\TTCloudBots\websocket-sharp\bin\Release\websocket-sharp.dll
-D:\Projects\TTCloudBots\websocket-sharp\obj\Release\ResolveAssemblyReference.cache
-D:\Projects\TTCloudBots\websocket-sharp\obj\Release\websocket-sharp.dll
