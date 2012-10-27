@@ -20,7 +20,7 @@ namespace TTAPI
         /// <param name="call">The API call that we will attempt to execute.</param>
         /// <param name="method">The calling method.  Either POST or GET.</param>
         /// <returns>The returned data from the call in the form of <see cref="T"/></returns>
-        public static T Request<T>(APICall call, string method = "GET") where T : Command
+        public static T Request<T>(APICall call, string method = "POST") where T : Command
         {
             string data = Request(call, method);
             bool successful = data.Substring(0, 5) == "[true";
@@ -33,6 +33,27 @@ namespace TTAPI
                 return deserialized;
             else throw new Exception(deserialized.err ?? String.Format("There was an error deserializing the returned data. ({0})", data));
             // I've always wanted to use ??.  And now I have!  :D
+        }
+        /// <summary>
+        /// Calls <see cref="TTAPI.TTWebInterface.Request"/> and interprets the returned data as <see cref="T"/>.  Throws an exception if there was an error returned.
+        /// </summary>
+        /// <typeparam name="T">The type of command that we will serialize to.</typeparam>
+        /// <param name="call">The API call that we will attempt to execute.</param>
+        /// <param name="results">The output of the request.</param>
+        /// <param name="method">The calling method.  Either POST or GET.</param>
+        /// <returns>Whether or not the request was successful.</returns>
+        public static bool Request<T>(APICall call, out T results, string method = "POST") where T : Command
+        {
+            string data = Request(call, method);
+            bool successful = data.Substring(0, 5) == "[true";
+            data = data.Remove(0, successful ? 7 : 8);
+            data = data.Remove(data.Length - 1);
+            data = Command.Preprocess(typeof(T), data);
+            T deserialized = serializer.Deserialize<T>(data);
+            successful &= deserialized.err == null;
+
+            results = deserialized;
+            return successful;
         }
 
         /// <summary>

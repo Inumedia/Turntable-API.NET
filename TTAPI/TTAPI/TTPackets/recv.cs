@@ -48,14 +48,14 @@ namespace TTAPI.Recv
         /// <returns>Processed data that should allow for mapping to <paramref name="serializeTo"/>.  If no preprocessable method exists, returns the <paramref name="input"/></returns>
         public static string Preprocess(Type serializeTo, string input)
         {
-            if (preProcessable.ContainsKey(serializeTo))
+            if (serializeTo != null && preProcessable.ContainsKey(serializeTo))
                 return preProcessable[serializeTo](input);
             return input;
         }
 
         public static Type MapCommandToType(string command)
         {
-            if (receivables.ContainsKey(command))
+            if (command != null && receivables.ContainsKey(command))
                 return receivables[command];
             return null;
         }
@@ -247,11 +247,13 @@ namespace TTAPI.Recv
         public static string PreProcess(string input)
         {
             string data = input;//.Replace("]}}, [", "]}}, [")
-            int i = 24, breakingPoint = -1;
+            int i = 0, breakingPoint = -1;
+            i = input.Substring(0, 24).IndexOf("\"rooms\": [")+11;
+            int startingPoint = i;
             StringBuilder builder = new StringBuilder(input.Substring(0,i-1));
-            while (i >= 24)
+            while (i >= startingPoint)
             {
-                if (i != 24) builder.Append(", ");
+                if (i != startingPoint) builder.Append(", ");
                 breakingPoint = data.IndexOf("}, [", i);
                 string roomData = data.Substring(i, breakingPoint - i+1);
                 i = data.IndexOf("], [{", i);
