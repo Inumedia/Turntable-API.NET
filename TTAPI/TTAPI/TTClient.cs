@@ -15,8 +15,6 @@ namespace TTAPI
     {
         static JavaScriptSerializer jss;
         static Dictionary<string, Handler> messageHandlers;
-        static Dictionary<string, Type> receivables;
-        static Dictionary<Type, MethodInfo> preProcessable;
 
         public WebSocket webSocket;
         WebClient webClient;
@@ -49,8 +47,6 @@ namespace TTAPI
         {
             jss = new JavaScriptSerializer();
             messageHandlers = new Dictionary<string, Handler>();
-            receivables = new Dictionary<string, Type>();
-            preProcessable = new Dictionary<Type, MethodInfo>();
             //List<Tuple<Handles,Handler>> handlers = Utilities.Reflector.FindAllMethods<Handles, Handler>();
             //foreach (Tuple<Handles, Handler> handlerCallback in handlers)
             //    messageHandlers.Add(handlerCallback.Item1.eventName, handlerCallback.Item2);
@@ -59,15 +55,6 @@ namespace TTAPI
             Type[] types = typeof(Command).Assembly.GetTypes();
             foreach (Type type in types)
             {
-                /// No point in iterating over all the types twice when we can just throw this in with this iteration.
-                /// This is for finding all the command to class convertable types.
-                CommandName[] commandAttributes = Attribute.GetCustomAttributes(type, typeof(CommandName), false) as CommandName[];
-                if (commandAttributes.Length != 0)
-                {
-                    foreach (CommandName attribute in commandAttributes)
-                        receivables.Add(attribute.Name, type);
-                }
-
                 ///This is for making generic wrappers to a generic delegate to a function that handles a command.
                 MethodInfo[] methods = type.GetMethods();
                 foreach (MethodInfo method in methods)
@@ -87,13 +74,6 @@ namespace TTAPI
                         messageHandlers.Add(handle.eventName, hardHandler);
                     }
                 }
-
-                if (!type.IsSubclassOf(CommandType))
-                    continue;
-
-                MethodInfo preproc = type.GetMethod("PreProcess", new Type[] { typeof(string) });
-                if (preproc != null && preproc.ReturnType == typeof(string))
-                    preProcessable.Add(type, preproc);
             }
         }
 
@@ -188,17 +168,14 @@ namespace TTAPI
             if (msgIdMatch.Groups.Count > 1)
                 if (int.TryParse(msgIdMatch.Groups[1].Value, out msgId) && messageCallbacks.ContainsKey(msgId))
                     has = messageCallbacks[msgId];
-            Type serializeTo = null;
-            if (command != null && receivables.ContainsKey(command))
-                serializeTo = receivables[command];
+            Type serializeTo = Command.MapCommandToType(command);
             if (has != null)
                 serializeTo = has.source.HandlerSerializeTo;
 
             try
             {
                 Command response;
-                if (serializeTo != null && preProcessable.ContainsKey(serializeTo))
-                    data = preProcessable[serializeTo].Invoke(null, new object[] { data }) as string;
+                data = Command.Preprocess(serializeTo, data);
                 if (serializeTo != null)
                     response = jss.Deserialize(data, serializeTo) as Command;
                 else

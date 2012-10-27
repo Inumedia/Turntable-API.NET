@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Web.Script.Serialization;
 using TTAPI;
@@ -8,6 +10,56 @@ namespace TTAPI.Recv
 {
     public class Command
     {
+        static Dictionary<string, Type> receivables;
+        static Dictionary<Type, Converter<string,string>> preProcessable;
+
+        static Command()
+        {
+            Type CommandType = typeof(Command);
+            Type[] types = typeof(Command).Assembly.GetTypes();
+            foreach (Type type in types)
+            {
+                receivables = new Dictionary<string, Type>();
+                preProcessable = new Dictionary<Type, Converter<string, string>>();
+
+                /// No point in iterating over all the types twice when we can just throw this in with this iteration.
+                /// This is for finding all the command to class convertable types.
+                CommandName[] commandAttributes = Attribute.GetCustomAttributes(type, typeof(CommandName), false) as CommandName[];
+                if (commandAttributes.Length != 0)
+                {
+                    foreach (CommandName attribute in commandAttributes)
+                        receivables.Add(attribute.Name, type);
+                }
+
+                if (!type.IsSubclassOf(CommandType))
+                    continue;
+
+                MethodInfo preproc = type.GetMethod("PreProcess", new Type[] { typeof(string) });
+                if (preproc != null && preproc.ReturnType == typeof(string))
+                    preProcessable.Add(type, Delegate.CreateDelegate(typeof(Converter<string,string>), preproc) as Converter<string,string>);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to preprocess text to allow easier mapping to a native object.
+        /// </summary>
+        /// <param name="serializeTo">The type that we are planning on serializing to.</param>
+        /// <param name="input">The input data that we are preprocessing.</param>
+        /// <returns>Processed data that should allow for mapping to <paramref name="serializeTo"/>.  If no preprocessable method exists, returns the <paramref name="input"/></returns>
+        public static string Preprocess(Type serializeTo, string input)
+        {
+            if (preProcessable.ContainsKey(serializeTo))
+                return preProcessable[serializeTo](input);
+            return input;
+        }
+
+        public static Type MapCommandToType(string command)
+        {
+            if (receivables.ContainsKey(command))
+                return receivables[command];
+            return null;
+        }
+
         public int msgid;
         public string command,
                       roomid,

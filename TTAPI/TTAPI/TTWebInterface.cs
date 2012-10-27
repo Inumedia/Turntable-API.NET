@@ -13,6 +13,13 @@ namespace TTAPI
     public static class TTWebInterface
     {
         static JavaScriptSerializer serializer = new JavaScriptSerializer();
+        /// <summary>
+        /// Calls <see cref="TTAPI.TTWebInterface.Request"/> and interprets the returned data as <see cref="T"/>.  Throws an exception if there was an error returned.
+        /// </summary>
+        /// <typeparam name="T">The type of command that we will serialize to.</typeparam>
+        /// <param name="call">The API call that we will attempt to execute.</param>
+        /// <param name="method">The calling method.  Either POST or GET.</param>
+        /// <returns>The returned data from the call in the form of <see cref="T"/></returns>
         public static T Request<T>(APICall call, string method = "GET") where T : Command
         {
             string data = Request(call, method);
@@ -27,6 +34,12 @@ namespace TTAPI
             // I've always wanted to use ??.  And now I have!  :D
         }
 
+        /// <summary>
+        /// Calls Turntable.fm's RPC equivalent of the API call.
+        /// </summary>
+        /// <param name="call">The API call that we will attempt to execute.</param>
+        /// <param name="method">The calling method.  Either POST or GET.</param>
+        /// <returns>The returned data from the call.  Usually in the form of an array, [successful, {objectData}]</returns>
         public static string Request(APICall call, string method = "POST")
         {
             string calling = string.Format("http://turntable.fm/api/{0}", call.api);
