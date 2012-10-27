@@ -26,6 +26,7 @@ namespace TTAPI
             bool successful = data.Substring(0, 5) == "[true";
             data = data.Remove(0, successful ? 7 : 8);
             data = data.Remove(data.Length - 1);
+            data = Command.Preprocess(typeof(T), data);
             T deserialized = serializer.Deserialize<T>(data);
             successful &= deserialized.err == null;
             if (successful)

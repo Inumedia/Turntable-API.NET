@@ -15,13 +15,13 @@ namespace TTAPI.Recv
 
         static Command()
         {
+            receivables = new Dictionary<string, Type>();
+            preProcessable = new Dictionary<Type, Converter<string, string>>();
+
             Type CommandType = typeof(Command);
             Type[] types = typeof(Command).Assembly.GetTypes();
             foreach (Type type in types)
             {
-                receivables = new Dictionary<string, Type>();
-                preProcessable = new Dictionary<Type, Converter<string, string>>();
-
                 /// No point in iterating over all the types twice when we can just throw this in with this iteration.
                 /// This is for finding all the command to class convertable types.
                 CommandName[] commandAttributes = Attribute.GetCustomAttributes(type, typeof(CommandName), false) as CommandName[];
