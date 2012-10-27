@@ -14,12 +14,15 @@ namespace TTAPI.Send
         public string userauth { get; set; }
         [ScriptIgnore]
         public Type HandlerSerializeTo { get; set; }
+        [ScriptIgnore]
+        public string CustomInterfaceAddress { get; set; }
 
-        public APICall(string apiToCall, string roomIdSubject = null, Type serializeTo = null)
+        public APICall(string apiToCall, string roomIdSubject = null, Type serializeTo = null, string customAddress = null)
         {
             api = apiToCall;
             roomid = roomIdSubject;
             HandlerSerializeTo = serializeTo;
+            CustomInterfaceAddress = customAddress;
         }
     }
 
@@ -205,5 +208,16 @@ namespace TTAPI.Send
         public string userauth { get; set; }
         [ScriptIgnore]
         public Type HandlerSerializeTo { get; set; }
+    }
+
+    public class EmailLogin : APICall
+    {
+        public string email, password;
+        public EmailLogin(string loginemail, string loginpassword)
+            : base("user.email_login")
+        {
+            email = loginemail;
+            password = loginpassword;
+        }
     }
 }

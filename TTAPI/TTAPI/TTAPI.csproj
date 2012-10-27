@@ -45,6 +45,7 @@
     <Compile Include="TTClient.cs" />
     <Compile Include="TTPackets\recv.cs" />
     <Compile Include="TTPackets\send.cs" />
+    <Compile Include="TTWebInterface.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -221,8 +221,7 @@ namespace TTAPI.Recv
     [CommandName("snagged")]
     public class Snagged : Command
     {
-        // We don't have to do anything specific for this, since it's all already done :D
-        // public string command, userid;
+        public string userid;
     }
 
     [CommandName("pmed")]
@@ -244,11 +243,17 @@ namespace TTAPI.Recv
 
     public class UserID : Command
     {
+        public string userid;
         // Again with the nothing to do.  I just like strong typing this. :D
     }
 
     public class Playlist : Command
     {
         public Song[] list;
+    }
+
+    public class UserAuth : Command
+    {
+        public string userid, userauth;
     }
 }
