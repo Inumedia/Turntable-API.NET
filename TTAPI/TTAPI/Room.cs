@@ -41,7 +41,7 @@ namespace TTAPI
 
     public class RoomMetadata
     {
-        public bool dj_full;
+        public bool dj_full, featured;
         public string[] djs,
                         moderator_id;
         public int upvotes,

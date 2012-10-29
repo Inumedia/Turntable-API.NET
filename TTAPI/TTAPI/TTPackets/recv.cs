@@ -19,24 +19,28 @@ namespace TTAPI.Recv
             preProcessable = new Dictionary<Type, Converter<string, string>>();
 
             Type CommandType = typeof(Command);
-            Type[] types = typeof(Command).Assembly.GetTypes();
-            foreach (Type type in types)
+            foreach (Assembly assm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                /// No point in iterating over all the types twice when we can just throw this in with this iteration.
-                /// This is for finding all the command to class convertable types.
-                CommandName[] commandAttributes = Attribute.GetCustomAttributes(type, typeof(CommandName), false) as CommandName[];
-                if (commandAttributes.Length != 0)
+                if (assm.GlobalAssemblyCache) continue;
+                Type[] types = assm.GetTypes();
+                foreach (Type type in types)
                 {
-                    foreach (CommandName attribute in commandAttributes)
-                        receivables.Add(attribute.Name, type);
+                    /// No point in iterating over all the types twice when we can just throw this in with this iteration.
+                    /// This is for finding all the command to class convertable types.
+                    CommandName[] commandAttributes = Attribute.GetCustomAttributes(type, typeof(CommandName), false) as CommandName[];
+                    if (commandAttributes.Length != 0)
+                    {
+                        foreach (CommandName attribute in commandAttributes)
+                            receivables.Add(attribute.Name, type);
+                    }
+
+                    if (!type.IsSubclassOf(CommandType))
+                        continue;
+
+                    MethodInfo preproc = type.GetMethod("PreProcess", new Type[] { typeof(string) });
+                    if (preproc != null && preproc.ReturnType == typeof(string))
+                        preProcessable.Add(type, Delegate.CreateDelegate(typeof(Converter<string, string>), preproc) as Converter<string, string>);
                 }
-
-                if (!type.IsSubclassOf(CommandType))
-                    continue;
-
-                MethodInfo preproc = type.GetMethod("PreProcess", new Type[] { typeof(string) });
-                if (preproc != null && preproc.ReturnType == typeof(string))
-                    preProcessable.Add(type, Delegate.CreateDelegate(typeof(Converter<string,string>), preproc) as Converter<string,string>);
             }
         }
 
@@ -309,5 +313,10 @@ namespace TTAPI.Recv
     public class UserAuth : Command
     {
         public string userid, userauth;
+    }
+
+    public class FavoriteList : Command
+    {
+        public string[] list;
     }
 }

@@ -14,12 +14,13 @@ namespace TTAPI
     {
         static JavaScriptSerializer serializer = new JavaScriptSerializer();
         /// <summary>
-        /// Calls <see cref="TTAPI.TTWebInterface.Request"/> and interprets the returned data as <see cref="T"/>.  Throws an exception if there was an error returned.
+        /// Calls <see cref="TTAPI.TTWebInterface.Request"/> and interprets the returned data as <see cref="T"/>.
         /// </summary>
         /// <typeparam name="T">The type of command that we will serialize to.</typeparam>
         /// <param name="call">The API call that we will attempt to execute.</param>
         /// <param name="method">The calling method.  Either POST or GET.</param>
         /// <returns>The returned data from the call in the form of <see cref="T"/></returns>
+        /// <exception cref="System.Exception">Thrown if the returned data from the request contains an error or was not successful.</exception>
         public static T Request<T>(APICall call, string method = "POST") where T : Command
         {
             string data = Request(call, method);
@@ -76,6 +77,7 @@ namespace TTAPI
             {
                 FieldInfo field = infos[i];
                 string fieldData = field.GetValue(call).ToString();
+                fieldData = fieldData.Replace("+", "%2B");
                 string formatted = string.Format("{0}={1}", field.Name, fieldData);
                 dataEntries[i] = formatted;
             }

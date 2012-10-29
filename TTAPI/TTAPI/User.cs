@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web.Script.Serialization;
 using TTAPI.Recv;
 
 namespace TTAPI
@@ -12,7 +13,15 @@ namespace TTAPI
                       status,
                       fbid,
                       twitterid;
-        public ACL acl;
+        [ScriptIgnore]
+        public ACL aclReadable
+        {
+            get
+            {
+                return (ACL)(int)Math.Round(acl, 0);
+            }
+        }
+        public double acl;
         public int fans,
                    points,
                    avatarid;

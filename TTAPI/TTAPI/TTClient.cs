@@ -52,26 +52,32 @@ namespace TTAPI
             //    messageHandlers.Add(handlerCallback.Item1.eventName, handlerCallback.Item2);
 
             Type CommandType = typeof(Command);
-            Type[] types = typeof(Command).Assembly.GetTypes();
-            foreach (Type type in types)
+            foreach (Assembly assm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                ///This is for making generic wrappers to a generic delegate to a function that handles a command.
-                MethodInfo[] methods = type.GetMethods();
-                foreach (MethodInfo method in methods)
+                Type[] types = assm.GetTypes();
+                foreach (Type type in types)
                 {
-                    Handles[] attribute = Attribute.GetCustomAttributes(method, typeof(Handles), false) as Handles[];
-                    if (attribute.Length == 0) continue;
-                    ParameterInfo[] parameters = method.GetParameters();
-                    foreach (Handles handle in attribute)
+                    ///This is for making generic wrappers to a generic delegate to a function that handles a command.
+                    MethodInfo[] methods = type.GetMethods();
+                    foreach (MethodInfo method in methods)
                     {
-                        Type actualType = parameters[1].ParameterType;
-                        Delegate genericHandler = Delegate.CreateDelegate(typeof(Handler<>).MakeGenericType(actualType), method);
-                        Handler hardHandler = new Handler((t, o) =>
+                        Handles[] attribute = Attribute.GetCustomAttributes(method, typeof(Handles), false) as Handles[];
+                        if (attribute.Length == 0) continue;
+                        ParameterInfo[] parameters = method.GetParameters();
+                        foreach (Handles handle in attribute)
                         {
-                            if (o.GetType() == actualType)
-                                genericHandler.DynamicInvoke(t, o);
-                        });
-                        messageHandlers.Add(handle.eventName, hardHandler);
+                            Type actualType = parameters[1].ParameterType;
+                            Delegate genericHandler = Delegate.CreateDelegate(typeof(Handler<>).MakeGenericType(actualType), method);
+                            Handler hardHandler = new Handler((t, o) =>
+                            {
+                                if (o.GetType() == actualType)
+                                    genericHandler.DynamicInvoke(t, o);
+                            });
+                            if (messageHandlers.ContainsKey(handle.eventName))
+                                messageHandlers[handle.eventName] = Delegate.Combine(messageHandlers[handle.eventName], hardHandler) as Handler;
+                            else
+                                messageHandlers.Add(handle.eventName, hardHandler);
+                        }
                     }
                 }
             }
@@ -357,11 +363,11 @@ namespace TTAPI
         {
             if (needsProcessing)
             {
-                message.msgid = msgId;
-                message.clientid = clientId;
-                message.userid = userId;
-                message.userauth = authId;
-                message.roomid = roomId;
+                if (message.msgid == 0) message.msgid = msgId; // Not really any work around for this...
+                if (message.clientid == null) message.clientid = clientId;
+                if (message.userid == null) message.userid = userId;
+                if (message.userauth == null) message.userauth = authId;
+                if (message.roomid == null) message.roomid = roomId;
             }
 
             if (callback != null)

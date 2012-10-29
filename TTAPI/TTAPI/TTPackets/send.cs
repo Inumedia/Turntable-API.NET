@@ -141,6 +141,7 @@ namespace TTAPI.Send
 
     public class ListRooms : APICall
     {
+        public string userid, userauth;
         public int skip;
         public ListRooms(int skipper = 0)
             : base("room.list_rooms")
@@ -219,5 +220,68 @@ namespace TTAPI.Send
             email = loginemail;
             password = loginpassword;
         }
+    }
+
+    public class GetFavorites : APICall
+    {
+        public string userid, userauth;
+        public GetFavorites() : base("room.get_favorites") { }
+    }
+
+    public class AddDJ : APICall
+    {
+        public AddDJ() : base("room.add_dj") { }
+    }
+
+    public class RemoveDJ : APICall
+    {
+        public RemoveDJ() : base("room.rem_dj") { }
+    }
+
+    public class StopSong : APICall
+    {
+        public StopSong() : base("room.stop_song") { }
+    }
+
+    public class AddFavorite : APICall
+    {
+        public AddFavorite(string target)
+            : base("room.add_favorite")
+        {
+            roomid = target;
+        }
+    }
+
+    public class RemoveFavorite : APICall
+    {
+        public RemoveFavorite(string target)
+            : base("room.rem_favorite")
+        {
+            roomid = target;
+        }
+    }
+
+    public class GetUserInformation : APICall
+    {
+        public GetUserInformation(string target)
+            : base("user.info")
+        {
+            userid = target;
+        }
+    }
+
+    public class GetAvailableAvatars : APICall
+    {
+        public GetAvailableAvatars() : base("user.available_avatars") { }
+    }
+
+    public class GetFansOf : APICall
+    {
+        public GetFansOf() : base("user.get_fan_of") { }
+    }
+
+    public class AttemptAuthentication : APICall
+    {
+        public AttemptAuthentication() : base("user.authenticate") { }
     }
 }
