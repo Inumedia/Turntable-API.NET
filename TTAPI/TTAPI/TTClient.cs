@@ -463,6 +463,8 @@ namespace TTAPI
                     this.usersInRoom.Remove(registered.userid);
                 this.usersInRoom.Add(registered.userid, registered);
             }
+            if (OnUserRegistered != null)
+                OnUserRegistered(registered);
         }
         public virtual void DeregisterUser(User deregistered)
         {
@@ -472,6 +474,8 @@ namespace TTAPI
                 throw new InvalidOperationException();
             }
             this.usersInRoom.Remove(deregistered.userid);
+            if (OnUserDeregistered != null)
+                OnUserDeregistered(deregistered);
         }
     }
 
