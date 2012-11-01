@@ -141,10 +141,24 @@ namespace TTAPI.Recv
         public User[] user;
     }
 
-    [CommandName("endsong")]
-    public class EndSong : Command
+    public class SongChange : Command
     {
         public Room room;
+    }
+
+    [CommandName("endsong")]
+    public class EndSong : SongChange
+    {
+    }
+
+    [CommandName("newsong")]
+    public class NewSong : SongChange
+    {
+    }
+
+    [CommandName("nosong")]
+    public class NoSong : SongChange
+    {
     }
 
     /// <summary>
@@ -186,18 +200,6 @@ namespace TTAPI.Recv
         public string userid,
                       name,
                       text;
-    }
-
-    [CommandName("newsong")]
-    public class NewSong : Command
-    {
-        public Room room;
-    }
-
-    [CommandName("nosong")]
-    public class NoSong : Command
-    {
-        Room room;
     }
 
     [CommandName("new_moderator")]

@@ -13,6 +13,10 @@ namespace TTAPI
 {
     public class TTClient
     {
+#if DEBUG
+        public static bool DEBUG_MODE = true;
+        public static event Action<string> DEBUG_STRING;
+#endif
         static JavaScriptSerializer jss;
         static Dictionary<string, Handler> messageHandlers;
 
@@ -41,15 +45,16 @@ namespace TTAPI
         public Room roomInformation { get; protected set; }
 
         public event StreamSync StreamsToSync;
-        public event Action<TTClient> OnJoinedRoom;
+        public event Action OnJoinedRoom;
+        public event Action<Room> OnUpdateRoom;
+        public event Action<RoomInfo> OnUpdateRoomInfo;
+        public event Action<User> OnUserRegistered;
+        public event Action<User> OnUserDeregistered;
 
         static TTClient()
         {
             jss = new JavaScriptSerializer();
             messageHandlers = new Dictionary<string, Handler>();
-            //List<Tuple<Handles,Handler>> handlers = Utilities.Reflector.FindAllMethods<Handles, Handler>();
-            //foreach (Tuple<Handles, Handler> handlerCallback in handlers)
-            //    messageHandlers.Add(handlerCallback.Item1.eventName, handlerCallback.Item2);
 
             Type CommandType = typeof(Command);
             foreach (Assembly assm in AppDomain.CurrentDomain.GetAssemblies())
@@ -144,8 +149,8 @@ namespace TTAPI
         public virtual void Initialize() { }
         public virtual void JoinedRoom()
         {
+            if (OnJoinedRoom != null) OnJoinedRoom();
             UpdateRoomInformation();
-            if (OnJoinedRoom != null) OnJoinedRoom(this);
         }
 
         public virtual void HandleMessage(object sender, string eventdata)
@@ -177,7 +182,10 @@ namespace TTAPI
             Type serializeTo = Command.MapCommandToType(command);
             if (has != null)
                 serializeTo = has.source.HandlerSerializeTo;
-
+#if DEBUG
+            if (DEBUG_MODE && DEBUG_STRING != null)
+                DEBUG_STRING(data);
+#endif
             try
             {
                 Command response;
@@ -412,15 +420,19 @@ namespace TTAPI
                 if ((djIndex = Array.FindIndex(djIDs, (o) => o == currentUser.userid)) != -1)
                     djs[djIndex] = currentUser;
             }
+            if (OnUpdateRoomInfo != null)
+                OnUpdateRoomInfo(info);
         }
 
-        public void UpdateRoomInformation(Room info)
+        public virtual void UpdateRoomInformation(Room info)
         {
             roomInformation = info;
             syncInformation = roomInformation.metadata.sync;
             syncTime = DateTime.Now;
             roomId = info.roomid;
             ResyncStream();
+            if (OnUpdateRoom != null)
+                OnUpdateRoom(info);
         }
 
         public void UpdateRoomInformation()
@@ -435,6 +447,31 @@ namespace TTAPI
                 int timeOffset = (int)(DateTime.Now - syncTime).TotalMilliseconds;
                 StreamsToSync(roomInformation.metadata.netloc + roomInformation.roomid, syncInformation.current_seg, syncInformation.tstamp - timeOffset, 500);
             }
+        }
+
+        public virtual void RegisterUser(User registered)
+        {
+            if (registered.userid == this.userId)
+            {
+                this.name = registered.name;
+                this.currentPoints = registered.points;
+                this.JoinedRoom();
+            }
+            else
+            {
+                if (this.usersInRoom.ContainsKey(registered.userid))
+                    this.usersInRoom.Remove(registered.userid);
+                this.usersInRoom.Add(registered.userid, registered);
+            }
+        }
+        public virtual void DeregisterUser(User deregistered)
+        {
+            if (deregistered.userid == this.userId)
+            {
+                Console.WriteLine("What the shit?");
+                throw new InvalidOperationException();
+            }
+            this.usersInRoom.Remove(deregistered.userid);
         }
     }
 
