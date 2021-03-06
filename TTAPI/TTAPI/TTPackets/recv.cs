@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using System.Text;
-using System.Web.Script.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using TTAPI;
 
 namespace TTAPI.Recv
@@ -11,7 +12,7 @@ namespace TTAPI.Recv
     public class Command
     {
         static Dictionary<string, Type> receivables;
-        static Dictionary<Type, Converter<string,string>> preProcessable;
+        static Dictionary<Type, Converter<string, string>> preProcessable;
 
         static Command()
         {
@@ -64,11 +65,13 @@ namespace TTAPI.Recv
             return null;
         }
 
-        public int msgid;
-        public string command,
-                      roomid,
-                      err;
-        public bool success;
+        public int msgid { get; set; }
+        public int interval { get; set; }
+        public float now { get; set; }
+        public string command { get; set; }
+        public string roomid { get; set; }
+        public string err { get; set; }
+        public bool success { get; set; }
 
         public Command()
         {
@@ -92,12 +95,10 @@ namespace TTAPI.Recv
 
     public class ChatServerInformation
     {
-        [ScriptIgnore]
         public int Port;
-        [ScriptIgnore]
         public string Address;
-        string[] serverInformation;
-        public string[] chatserver
+        object [] serverInformation;
+        public object[] chatserver
         {
             get
             {
@@ -107,11 +108,12 @@ namespace TTAPI.Recv
             {
                 serverInformation = value;
 
+                if (value == null) return;
+
                 if (value.Length == 2)
                 {
-                    Port = -1;
-                    if (!int.TryParse(value[1], out Port)) return;
-                    Address = value[0];
+                    Port = ((JsonElement)value[1]).GetInt32();
+                    Address = ((JsonElement)value[0]).GetString();
                 }
             }
         }
@@ -120,25 +122,25 @@ namespace TTAPI.Recv
     [CommandName("registered")]
     public class Registered : Command
     {
-        public User[] user;
+        public User[] user { get; set; }
     }
 
     [CommandName("deregistered")]
     public class DeRegistered : Command
     {
-        public User[] user;
+        public User[] user { get; set; }
     }
 
     [CommandName("add_dj")]
     public class AddDJ : Command
     {
-        public User[] user;
+        public User[] user { get; set; }
     }
 
     [CommandName("rem_dj")]
     public class RemoveDJ : Command
     {
-        public User[] user;
+        public User[] user { get; set; }
     }
 
     public class SongChange : Command
@@ -167,7 +169,7 @@ namespace TTAPI.Recv
     /// <remarks>Can only be obtained by explicitly typing</remarks>
     public class FanOf : Command
     {
-        public string[] fanof;
+        public string[] fanof { get; set; }
     }
 
     /// <summary>
@@ -176,7 +178,7 @@ namespace TTAPI.Recv
     /// <remarks>Can only be obtained by explicitly typing</remarks>
     public class Favorites : Command
     {
-        public string[] list;
+        public string[] list { get; set; }
     }
 
     /// <summary>
@@ -185,50 +187,48 @@ namespace TTAPI.Recv
     /// <remarks>Can only be obtained by explicitly typing</remarks>
     public class GetFans : Command
     {
-        public string[] fans;
+        public string[] fans { get; set; }
     }
 
     public class RoomInfo : Command
     {
-        public Room room;
-        public User[] users;
+        public Room room { get; set; }
+        public User[] users { get; set; }
     }
 
     [CommandName("speak")]
     public class Speak : Command
     {
-        public string userid,
-                      name,
-                      text;
+        public string userid { get; set; }
+        public string name { get; set; }
+        public string text { get; set; }
     }
 
     [CommandName("new_moderator")]
     public class NewModerator : Command
     {
-        public string userid;
+        public string userid { get; set; }
     }
 
     [CommandName("rem_moderator")]
     public class RemoveModerator : Command
     {
-        public string userid;
+        public string userid { get; set; }
     }
 
     public class PMHistory : Command
     {
-        public PrivateMessage[] history;
+        public PrivateMessage[] history { get; set; }
     }
 
     public class Rooms : Command
     {
-        static JavaScriptSerializer serializer = new JavaScriptSerializer();
-
-        public RoomUserPair[] rooms;
+        public RoomUserPair[] rooms { get; set; }
 
         public class RoomUserPair
         {
-            public Room room;
-            public User[] users;
+            public Room room { get; set; }
+            public User[] users { get; set; }
             public string this[int i]
             {
                 get
@@ -240,11 +240,11 @@ namespace TTAPI.Recv
                 {
                     if (i == 0)
                     {
-                        room = serializer.Deserialize<Room>(value);
+                        room = JsonSerializer.Deserialize<Room>(value);
                     }
                     else
                     {
-                        users = serializer.Deserialize<User[]>(value);
+                        users = JsonSerializer.Deserialize<User[]>(value);
                     }
                 }
             }
@@ -281,44 +281,48 @@ namespace TTAPI.Recv
     [CommandName("snagged")]
     public class Snagged : Command
     {
-        public string userid;
+        public string userid { get; set; }
     }
 
     [CommandName("pmed")]
     public class PrivateMessage : Command
     {
-        public string text, userid, senderid, command;
-        public double time;
+        public string text { get; set; }
+                    public string userid { get; set; }
+        public string senderid { get; set; }
+        public string command { get; set; }
+        public double time { get; set; }
     }
 
     public class AvatarList : Command
     {
-        public AvatarRequirements[] avatars;
+        public AvatarRequirements[] avatars { get; set; }
     }
 
     public class Presence : Command
     {
-        public UserPresence presence;
+        public UserPresence presence { get; set; }
     }
 
     public class UserID : Command
     {
-        public string userid;
+        public string userid { get; set; }
         // Again with the nothing to do.  I just like strong typing this. :D
     }
 
     public class Playlist : Command
     {
-        public Song[] list;
+        public Song[] list { get; set; }
     }
 
     public class UserAuth : Command
     {
-        public string userid, userauth;
-    }
+        public string userid { get; set; }
+        public string userauth { get; set; }
+}
 
     public class FavoriteList : Command
     {
-        public string[] list;
+        public string[] list { get; set; }
     }
 }

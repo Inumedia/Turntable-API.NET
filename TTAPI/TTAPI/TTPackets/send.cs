@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web.Script.Serialization;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json.Serialization;
 
 namespace TTAPI.Send
 {
@@ -10,11 +12,12 @@ namespace TTAPI.Send
         public string api { get; set; }
         public string roomid { get; set; }
         public string clientid { get; set; }
+        public string client { get; set; } = "web";
         public string userid { get; set; }
         public string userauth { get; set; }
-        [ScriptIgnore]
+        [JsonIgnore]
         public Type HandlerSerializeTo { get; set; }
-        [ScriptIgnore]
+        [JsonIgnore]
         public string CustomInterfaceAddress { get; set; }
 
         public APICall(string apiToCall, string roomIdSubject = null, Type serializeTo = null, string customAddress = null)
@@ -34,13 +37,13 @@ namespace TTAPI.Send
         string clientid { get; set; }
         string userid { get; set; }
         string userauth { get; set; }
-        [ScriptIgnore]
+        [JsonIgnore]
         Type HandlerSerializeTo { get; set; }
     }
 
     public class SpeakAPI : APICall
     {
-        public string text;
+        public string text { get; set; }
         public SpeakAPI(string msg)
             : base("room.speak")
         {
@@ -50,7 +53,7 @@ namespace TTAPI.Send
 
     public class ChangeName : APICall
     {
-        public string name;
+        public string name { get; set; }
         public ChangeName(string newName)
             : base("user.modify")
         {
@@ -60,7 +63,7 @@ namespace TTAPI.Send
 
     public class ChangeLaptop : APICall
     {
-        public string laptop;
+        public string laptop { get; set; }
         public ChangeLaptop(string newLaptop)
             : base("user.modify")
         {
@@ -70,7 +73,7 @@ namespace TTAPI.Send
 
     public class SetAvatar : APICall
     {
-        public int avatarid;
+        public int avatarid { get; set; }
         public SetAvatar(int newAvatarId)
             : base("user.set_avatar")
         {
@@ -80,7 +83,7 @@ namespace TTAPI.Send
 
     public class BecomeFan : APICall
     {
-        public string djid;
+        public string djid { get; set; }
         public BecomeFan(string userId)
             : base("user.become_fan")
         {
@@ -90,7 +93,7 @@ namespace TTAPI.Send
 
     public class RemoveFan : APICall
     {
-        public string djid;
+        public string djid { get; set; }
         public RemoveFan(string userId)
             : base("user.remove_fan")
         {
@@ -100,7 +103,7 @@ namespace TTAPI.Send
 
     public class RoomInfoRequest : APICall
     {
-        public bool extended;
+        public bool extended { get; set; }
         public RoomInfoRequest(bool isextended = false)
             : base("room.info")
         {
@@ -110,7 +113,7 @@ namespace TTAPI.Send
 
     public class BootUser : APICall
     {
-        public string target_userid;
+        public string target_userid { get; set; }
 
         public BootUser(string target)
             : base("room.boot_user")
@@ -121,7 +124,7 @@ namespace TTAPI.Send
 
     public class BootUserReason : BootUser
     {
-        public string reason;
+        public string reason { get; set; }
         public BootUserReason(string target, string bootReason)
             : base(target)
         {
@@ -131,7 +134,7 @@ namespace TTAPI.Send
 
     public class PresenceUpdate : APICall
     {
-        public string status;
+        public string status { get; set; }
         public PresenceUpdate(string presenceStatus)
             : base("presence.update")
         {
@@ -141,8 +144,9 @@ namespace TTAPI.Send
 
     public class ListRooms : APICall
     {
-        public string userid, userauth;
-        public int skip;
+        public string userid { get; set; }
+        public string userauth { get; set; }
+        public int skip { get; set; }
         public ListRooms(int skipper = 0)
             : base("room.list_rooms")
         {
@@ -161,7 +165,7 @@ namespace TTAPI.Send
 
     public class GetProfile : APICall
     {
-        public string userid;
+        public string userid { get; set; }
         public GetProfile(string target = null)
             : base("user.get_profile")
         {
@@ -171,7 +175,7 @@ namespace TTAPI.Send
 
     public class GetPresence : APICall
     {
-        public string uid;
+        public string uid { get; set; }
         public GetPresence(string target = null) : base("presence.get")
         {
             uid = target;
@@ -180,7 +184,7 @@ namespace TTAPI.Send
 
     public class GetUserID : APICall
     {
-        public string name;
+        public string name { get; set; }
         public GetUserID(string target = null)
             : base("user.get_id")
         {
@@ -190,8 +194,8 @@ namespace TTAPI.Send
 
     public class GetPlaylist : APICall
     {
-        public string playlist_name;
-        public bool minimal;
+        public string playlist_name { get; set; }
+        public bool minimal { get; set; }
         public GetPlaylist(string name = "default", bool isMinimal = false) : base("playlist.all")
         {
             minimal = isMinimal;
@@ -207,13 +211,15 @@ namespace TTAPI.Send
         public string userid { get { return base.userid; } set { base.userid = value; } }
         public string clientid { get; set; }
         public string userauth { get; set; }
-        [ScriptIgnore]
+        [JsonIgnore]
         public Type HandlerSerializeTo { get; set; }
     }
 
     public class EmailLogin : APICall
     {
-        public string email, password;
+        public string email { get; set; }
+        public string password { get; set; }
+        public string fingerprint { get; set; } = BitConverter.ToString(SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes($"{System.Net.Dns.GetHostName()}-{DateTime.UtcNow.ToString()}"))).Replace("-", "").ToLower();
         public EmailLogin(string loginemail, string loginpassword)
             : base("user.email_login")
         {
@@ -224,7 +230,9 @@ namespace TTAPI.Send
 
     public class GetFavorites : APICall
     {
-        public string userid, userauth;
+        public string userid { get; set; }
+        
+        public string userauth { get; set; }
         public GetFavorites() : base("room.get_favorites") { }
     }
 
@@ -283,5 +291,26 @@ namespace TTAPI.Send
     public class AttemptAuthentication : APICall
     {
         public AttemptAuthentication() : base("user.authenticate") { }
+    }
+
+    public class RoomVote : APICall
+    {
+        public string vh { get; set; }
+        public string th { get; set; }
+        public string ph { get; set; }
+        public string val { get; set; }
+
+        public RoomVote(string vote, string roomId, string currentSongId, Random random) : base("room.vote", roomId)
+        {
+            val = vote;
+
+            using var sha = SHA1.Create();
+            vh = BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes($"{roomId}{vote}{currentSongId}"))).Replace("-", "").ToLower();
+            byte[] randomBuffer = new byte[16];
+            random.NextBytes(randomBuffer);
+            th = BitConverter.ToString(sha.ComputeHash(randomBuffer)).Replace("-", "").ToLower();
+            random.NextBytes(randomBuffer);
+            ph = BitConverter.ToString(sha.ComputeHash(randomBuffer)).Replace("-", "").ToLower();
+        }
     }
 }

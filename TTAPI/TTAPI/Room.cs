@@ -1,23 +1,21 @@
 ﻿using System;
-using System.Web.Script.Serialization;
 using TTAPI.Recv;
 
 namespace TTAPI
 {
     public class Room
     {
-        public string name,
-                      shortcut,
-                      name_lower,
-                      roomid,
-                      description;
-        public double created;
-        public RoomMetadata metadata;
+        public string name                                { get; set; }
+        public string               shortcut              { get; set; }
+        public string               name_lower            { get; set; }
+        public string               roomid                { get; set; }
+        public string description { get; set; }
+        public double created { get; set; }
+        public RoomMetadata metadata { get; set; }
 
-        [ScriptIgnore]
-        public ChatServerInformation ServerInformation;
-        string[] chatServerInformation;
-        public string[] chatserver
+        public ChatServerInformation ServerInformation { get; set; }
+        object[] chatServerInformation { get; set; }
+        public object[] chatserver
         {
             get
             {
@@ -41,27 +39,27 @@ namespace TTAPI
 
     public class RoomMetadata
     {
-        public bool dj_full, featured;
-        public string[] djs,
-                        moderator_id;
-        public int upvotes,
-                   downvotes,
-                   listeners,
-                   djcount;
-        public double random,
-                      max_djs,
-                      max_size,
-                      djthreshold;
-        public string privacy,
-                      userid,
-                      current_dj,
-                      genre,
-                      netloc;
-        public User creator;
+        public bool dj_full { get; set; }
+        public bool featured { get; set; }
+        public string[] djs { get; set; }
+        public string[] moderator_id { get; set; }
+        public int upvotes { get; set; }
+        public int downvotes { get; set; }
+        public int listeners { get; set; }
+        public int djcount { get; set; }
+        public double random { get; set; }
+        public double max_djs { get; set; }
+        public double max_size { get; set; }
+        public double djthreshold { get; set; }
+        public string privacy { get; set; }
+        public string userid { get; set; }
+        public string current_dj { get; set; }
+        public string genre { get; set; }
+        public string netloc { get; set; }
+        public User creator { get; set; }
 
-        [ScriptIgnore]
-        public UserVote[] VoteLog;
-        string[][] voteloginternal;
+        public UserVote[] VoteLog { get; set; }
+        string[][] voteloginternal { get; set; }
         public string[][] votelog
         {
             get
@@ -75,12 +73,18 @@ namespace TTAPI
             }
         }
 
-        public Song current_song;
-        public Song[] songlog;
-        public SyncInformation sync;
+        public Song current_song { get; set; }
+        public Song[] songlog { get; set; }
+        public SyncInformation sync { get; set; }
 
         public void SetVoteLog(string[][] log)
         {
+            if (log == null)
+            {
+                VoteLog = new UserVote[0];
+                return;
+            }
+
             VoteLog = new UserVote[log.Length];
             for (int i = 0; i < log.Length; ++i)
             {
@@ -99,15 +103,15 @@ namespace TTAPI
 
     public class StreamInformation
     {
-        public string file;
-        public int first_seg_id;
-        public double start_time;
+        public string file { get; set; }
+        public int first_seg_id { get; set; }
+        public double start_time { get; set; }
     }
 
     public class UserVote
     {
-        public string userid;
-        public Vote vote;
+        public string userid { get; set; }
+        public Vote vote { get; set; }
 
         public override string ToString()
         {
@@ -117,9 +121,9 @@ namespace TTAPI
 
     public class SyncInformation
     {
-        public int current_seg,
-                   tstamp;
-    }
+        public int current_seg { get; set; }
+        public int tstamp { get; set; }
+}
 
     public enum Vote
     {

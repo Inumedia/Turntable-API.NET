@@ -7,15 +7,15 @@ namespace TTAPI
 {
     public class Song
     {
-        public string djid,
-                      _id,
-                      djname,
-                      sourceid,
-                      source;
+        public string djid { get; set; }
+        public string _id { get; set; }
+        public string djname { get; set; }
+        public string sourceid { get; set; }
+        public string source { get; set; }
         public bool snaggable;
-        public double score;
-        public double starttime;
-        public SongMetadata metadata;
+        public double score { get; set; }
+        public double starttime { get; set; }
+        public SongMetadata metadata { get; set; }
 
         public override string ToString()
         {
@@ -27,12 +27,12 @@ namespace TTAPI
 
     public class SongMetadata
     {
-        public string album,
-                      artist,
-                      coverart,
-                      song,
-                      mnid,
-                      genre;
-        public int length;
+        public string album { get; set; }
+        public string artist { get; set; }
+        public string coverart { get; set; }
+        public string song { get; set; }
+        public string mnid { get; set; }
+        public string genre { get; set; }
+        public int length { get; set; }
     }
 }

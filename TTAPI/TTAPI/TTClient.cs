@@ -1,48 +1,42 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.WebSockets;
 using System.Reflection;
-using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Web.Script.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using TTAPI.Recv;
 using TTAPI.Send;
-using WebSocketSharp;
 
 namespace TTAPI
 {
     public class TTClient
     {
-#if DEBUG
-        public static bool DEBUG_MODE = true;
-        public static event Action<string> DEBUG_STRING;
-#endif
-        static JavaScriptSerializer jss;
-        static Dictionary<string, Handler> messageHandlers;
-
-        public WebSocket webSocket;
-        WebClient webClient;
-        public Dictionary<string, Handler> specifiedHandlers;
-        public bool isConnected { get { return webSocket.ReadyState == WsState.OPEN; } }
-        public DateTime lastHeartbeat;
-        public DateTime lastActivity;
-        Dictionary<int, HandlerAndSource> messageCallbacks;
+        static HttpClient _httpClient = new HttpClient();
         public DateTime syncTime { get; protected set; }
 
         public string userId,
                 authId,
                 roomId,
                 name,
-                clientId,
-                currentStatus;
+                clientId;
         public int currentPoints,
                 msgId;
+        private TTSocket TTSock;
+        public DateTime lastHeartbeat;
 
         public SyncInformation syncInformation { get; protected set; }
         public List<User> usersOnDeck { get; protected set; }
         public Dictionary<string, User> usersInRoom { get; protected set; }
         public ChatServerInformation serverInformation { get; protected set; }
         public Room roomInformation { get; protected set; }
+        public DateTime? NextPresenceUpdateAt { get; private set; }
+        public TimeSpan? ExpectedPresenceUpdateInterval { get; private set; }
 
         public event StreamSync StreamsToSync;
         public event Action OnJoinedRoom;
@@ -50,202 +44,84 @@ namespace TTAPI
         public event Action<RoomInfo> OnUpdateRoomInfo;
         public event Action<User> OnUserRegistered;
         public event Action<User> OnUserDeregistered;
+        public string DesiredPresence = "available";
+        public ILogger _logger { get; private set; }
+        public bool IsConnected { get => TTSock != null && TTSock.isConnected; }
 
-        static TTClient()
+        private readonly ILoggerFactory _logFactory;
+        private Random random;
+
+        public TTClient(ILoggerFactory logFactory) => _logFactory = logFactory;
+
+        public TTClient(string userid, string authid, string roomid) { }
+
+        public async Task<bool> ConnectAsync(string userId, string authId, string roomId, CancellationToken cancelToken)
         {
-            jss = new JavaScriptSerializer();
-            messageHandlers = new Dictionary<string, Handler>();
+            cancelToken.ThrowIfCancellationRequested();
 
-            Type CommandType = typeof(Command);
-            foreach (Assembly assm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                Type[] types = assm.GetTypes();
-                foreach (Type type in types)
-                {
-                    ///This is for making generic wrappers to a generic delegate to a function that handles a command.
-                    MethodInfo[] methods = type.GetMethods();
-                    foreach (MethodInfo method in methods)
-                    {
-                        Handles[] attribute = Attribute.GetCustomAttributes(method, typeof(Handles), false) as Handles[];
-                        if (attribute.Length == 0) continue;
-                        ParameterInfo[] parameters = method.GetParameters();
-                        foreach (Handles handle in attribute)
-                        {
-                            Type actualType = parameters[1].ParameterType;
-                            Delegate genericHandler = Delegate.CreateDelegate(typeof(Handler<>).MakeGenericType(actualType), method);
-                            Handler hardHandler = new Handler((t, o) =>
-                            {
-                                if (o.GetType() == actualType)
-                                    genericHandler.DynamicInvoke(t, o);
-                            });
-                            if (messageHandlers.ContainsKey(handle.eventName))
-                                messageHandlers[handle.eventName] = Delegate.Combine(messageHandlers[handle.eventName], hardHandler) as Handler;
-                            else
-                                messageHandlers.Add(handle.eventName, hardHandler);
-                        }
-                    }
-                }
-            }
-        }
-
-        public TTClient(string userid, string authid, string roomid)
-        {
-            webClient = new WebClient();
-            specifiedHandlers = new Dictionary<string, Handler>();
-
-            this.userId = userid;
-            this.authId = authid;
-            this.roomId = roomid;
+            this.userId = userId;
+            if (int.TryParse(this.userId.Substring(0, 8), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out int seed))
+                random = new Random(seed);
+            else random = new Random(DateTime.UtcNow.Second);
+            this._logger = _logFactory.CreateLogger($"TT({userId})");
+            this.authId = authId;
+            this.roomId = roomId;
 
             usersInRoom = new Dictionary<string, User>();
             usersOnDeck = new List<User>();
-        }
 
-        public virtual bool Connect(Action<WebSocket> preprocess = null)
-        {
-            this.currentStatus = "available";
             this.clientId = String.Format("{0}-0.59633534294921572", DateTime.Now.ToBinary().ToString());
+
             try
             {
-                Select_Server();
-                webSocket = new WebSocket(String.Format("ws://{0}:{1}/socket.io/websocket", serverInformation.Address, serverInformation.Port));
+                await SelectServerAsync();
+                TTSock = new TTSocket(this, serverInformation);
+                TTSock.OnConnected += () =>
+                {
+                    Send(new APICall("room.register", roomId));
+                    Send(new ChangeLaptop("pc"));
+                    Send(new RoomInfoRequest());
+                };
+                TTSock.OnDisconnected += () => ConnectAsync(userId, authId, roomId, cancelToken).GetAwaiter().GetResult();
+                await TTSock.ConnectAsync(cancelToken);
             }
-            catch (WebException)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Couldn't connect");
                 return false;
             }
 
-            if (preprocess != null) preprocess(webSocket);
-
-            messageCallbacks = new Dictionary<int, HandlerAndSource>();
-            MessageEventHandler no_session = null;
-            no_session = new MessageEventHandler((o, eventdata) =>
-            {
-                if (!eventdata.Equals("~m~10~m~no_session"))
-                {
-                    webSocket.OnMessage -= no_session;
-                    return;
-                }
-                webSocket.OnMessage += new MessageEventHandler(HandleMessage);
-                StartAuthentication((i, res) =>
-                {
-                    if (webSocket.ReadyState != WsState.OPEN)
-                    {
-                        Console.WriteLine("Couldn't authenticate.");
-                        return;
-                    }
-
-                    Send(new APICall("room.register", roomId));
-                });
-            });
-            webSocket.OnMessage += no_session;
-            webSocket.Connect();
-
-            Initialize();
-
-            return webSocket.ReadyState == WsState.OPEN;
+            return TTSock.isConnected;
         }
 
-        public virtual void Initialize() { }
+        public void Vote(string vote) => Send(new RoomVote(vote, roomId, roomInformation.metadata.current_song._id, random));
+
         public virtual void JoinedRoom()
         {
             if (OnJoinedRoom != null) OnJoinedRoom();
             UpdateRoomInformation();
         }
 
-        public virtual void HandleMessage(object sender, string eventdata)
+        public async Task SelectServerAsync()
         {
-            if (Regex.Match(eventdata, "~h~[0-9]+").Length > 0)
-            {
-                lastHeartbeat = DateTime.Now;
-                SendRaw(eventdata);
-                UpdatePresence();
-                return;
-            }
+            var getRoomChat = await _httpClient.GetAsync(String.Format("http://turntable.fm/api/room.which_chatserver?roomid={0}", roomId));
+            getRoomChat.EnsureSuccessStatusCode();
+            var resp = await getRoomChat.Content.ReadAsStringAsync();
 
-            lastActivity = DateTime.Now;
-
-            string[] eventDataSplit = eventdata.Split(new char[]{'~'}, 5);
-            int length = int.Parse(eventDataSplit[2]);
-            string data = eventDataSplit[4];
-
-            Match commandMatch = Regex.Match(data, "\"command\": \"([a-z]*)\"");
-            Match msgIdMatch = Regex.Match(data, "\"msgid\": ([0-9]*)");
-            HandlerAndSource has = null;
-            string command = null;
-            int msgId = -1;
-            if (commandMatch.Groups.Count > 1)
-                command = commandMatch.Groups[1].Value;
-            if (msgIdMatch.Groups.Count > 1)
-                if (int.TryParse(msgIdMatch.Groups[1].Value, out msgId) && messageCallbacks.ContainsKey(msgId))
-                    has = messageCallbacks[msgId];
-            Type serializeTo = Command.MapCommandToType(command);
-            if (has != null)
-                serializeTo = has.source.HandlerSerializeTo;
-#if DEBUG
-            if (DEBUG_MODE && DEBUG_STRING != null)
-                DEBUG_STRING(data);
-#endif
-            try
-            {
-                Command response;
-                data = Command.Preprocess(serializeTo, data);
-                if (serializeTo != null)
-                    response = jss.Deserialize(data, serializeTo) as Command;
-                else
-                    response = jss.Deserialize<Command>(data);
-                if (!String.IsNullOrEmpty(response.err))
-                {
-                    Console.WriteLine("[Error!]{0}", response.err);
-                    return;
-                }
-                //Command basicresponse = jss.Deserialize<Command>(data);
-                if (has != null)
-                    has.handler(this, response);
-                if (response.command != null && messageHandlers.ContainsKey(response.command))
-                    messageHandlers[response.command](this, response);
-                if (response.command != null && specifiedHandlers.ContainsKey(response.command))
-                    specifiedHandlers[response.command](this, response);
-            }
-            catch (ArgumentException) { }
-        }
-
-        public void Select_Server()
-        {
-            string resp = webClient.DownloadString(String.Format("http://turntable.fm/api/room.which_chatserver?roomid={0}", roomId));
             int start = resp.IndexOf(", ")+2,
                 end = resp.LastIndexOf("]");
             string successful = resp.Substring(1, start - 3);
             if (successful.Equals("true"))
             {
                 string serverInformationJSON = resp.Substring(start, end - start);
-                serverInformation = jss.Deserialize<ChatServerInformation>(serverInformationJSON);
+                serverInformation = JsonSerializer.Deserialize<ChatServerInformation>(serverInformationJSON);
             }
-            /*if (respJSON[0].Equals(true))
-            {
-                server = respJSON[1]["chatserver"][0];
-                server_port = respJSON[1]["chatserver"][1];
-            }*/
         }
 
-        public void ExplicitlyHandle(string eventName, Handler callback)
-        {
-            this.specifiedHandlers.Add(eventName, callback);
-        }
-
-        public void ExplicitlyHandle<T>(string eventName, Handler<T> callback) where T : Command
-        {
-            ExplicitlyHandle(eventName, new Handler((c, o) =>
-            {
-                if (o is T)
-                    callback(c, o as T);
-            }));
-        }
-
-        public void StartAuthentication(Handler callback = null)
-        {
-            Send(new APICall("user.authenticate"), callback);
-        }
+        //public void StartAuthentication(Handler callback = null)
+        //{
+        //    Send(new APICall("user.authenticate"), callback);
+        //}
         public void GetFanOf(Handler<FanOf> callback = null)
         {
             Send(new APICall("user.get_fan_of"), callback, true);
@@ -348,7 +224,7 @@ namespace TTAPI
 
         public void SetStatus(string status)
         {
-            this.currentStatus = status;
+            this.DesiredPresence = status;
             UpdatePresence();
         }
 
@@ -367,42 +243,46 @@ namespace TTAPI
             }), needsProcessing);
         }
 
-        public void Send(IAPICall message, Handler callback = null, bool needsProcessing = true)
+        public void Send<K>(K message, Handler callback = null, bool needsProcessing = true)
+            where K : IAPICall
         {
             if (needsProcessing)
             {
-                if (message.msgid == 0) message.msgid = msgId; // Not really any work around for this...
                 if (message.clientid == null) message.clientid = clientId;
                 if (message.userid == null) message.userid = userId;
                 if (message.userauth == null) message.userauth = authId;
                 if (message.roomid == null) message.roomid = roomId;
             }
 
-            if (callback != null)
-                messageCallbacks.Add(msgId, new HandlerAndSource(callback, message));
-
-            string sendingMessage = jss.Serialize(message);
-            webSocket.Send(String.Format("~m~{0}~m~{1}", sendingMessage.Length, sendingMessage));
-
-            ++msgId;
-        }
-
-        public void SendRaw(string message)
-        {
-            lastActivity = DateTime.Now;
-
-            webSocket.Send(message);
-            ++msgId;
+            TTSock.Send(message, callback);
         }
 
         public void Close()
         {
-            webSocket.Close();
+            TTSock.Close();
         }
 
         public void UpdatePresence(Handler callback = null)
         {
-            Send(new PresenceUpdate(currentStatus), callback);
+            if (NextPresenceUpdateAt.HasValue)
+            {
+                var difference = DateTime.UtcNow - NextPresenceUpdateAt.Value;
+                // If the next update is expected in 5 seconds or more, return. Prevent us from spamming.
+                if (difference.TotalSeconds < -5) return;
+            }
+
+            if (ExpectedPresenceUpdateInterval.HasValue)
+                NextPresenceUpdateAt = DateTime.UtcNow.Add(ExpectedPresenceUpdateInterval.Value);
+
+            _logger.LogDebug("{0} Sending update presence, next expected at {1}", userId, NextPresenceUpdateAt);
+
+            Send(new PresenceUpdate(DesiredPresence), (client, command) =>
+            {
+                client.NextPresenceUpdateAt = DateTime.UtcNow.AddSeconds(command.interval);
+                ExpectedPresenceUpdateInterval = TimeSpan.FromSeconds(command.interval);
+                if (callback != null)
+                    callback(client, command);
+            });
         }
 
         public void UpdateRoomInformation(RoomInfo info)
@@ -470,7 +350,7 @@ namespace TTAPI
         {
             if (deregistered.userid == this.userId)
             {
-                Console.WriteLine("What the shit?");
+                _logger.LogError("What the shit?");
                 throw new InvalidOperationException();
             }
             this.usersInRoom.Remove(deregistered.userid);

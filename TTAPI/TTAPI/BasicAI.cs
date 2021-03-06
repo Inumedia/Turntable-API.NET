@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using TTAPI.Recv;
 
 namespace TTAPI
@@ -29,6 +30,15 @@ namespace TTAPI
         public static void NoSong(TTClient instance, SongChange roomInfo)
         {
             instance.UpdateRoomInformation(roomInfo.room);
+        }
+
+        [Handles("speak")]
+        public static void Speak(TTClient instance, Speak speak)
+        {
+            instance._logger.LogInformation("{0}: {1}", speak.name, speak.text);
+
+            if (speak.text == "/bop") instance.Vote("up");
+            if (speak.text == "/boo") instance.Vote("down");
         }
     }
 }

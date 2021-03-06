@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
-using System.Web.Script.Serialization;
+using System.Text.Json;
+using System.Threading.Tasks;
 using TTAPI.Recv;
 using TTAPI.Send;
 
@@ -12,7 +15,8 @@ namespace TTAPI
 {
     public static class TTWebInterface
     {
-        static JavaScriptSerializer serializer = new JavaScriptSerializer();
+        static HttpClient client = new HttpClient();
+
         /// <summary>
         /// Calls <see cref="TTAPI.TTWebInterface.Request"/> and interprets the returned data as <see cref="T"/>.
         /// </summary>
@@ -21,20 +25,17 @@ namespace TTAPI
         /// <param name="method">The calling method.  Either POST or GET.</param>
         /// <returns>The returned data from the call in the form of <see cref="T"/></returns>
         /// <exception cref="System.Exception">Thrown if the returned data from the request contains an error or was not successful.</exception>
-        public static T Request<T>(APICall call, string method = "POST") where T : Command
+        public static async Task<T> RequestAsync<T>(APICall call, string method = "POST") where T : Command
         {
-            string data = Request(call, method);
-            bool successful = data.Substring(0, 5) == "[true";
-            data = data.Remove(0, successful ? 7 : 8);
-            data = data.Remove(data.Length - 1);
+            string data = await RequestAsync(call, method);
             data = Command.Preprocess(typeof(T), data);
-            T deserialized = serializer.Deserialize<T>(data);
-            successful &= deserialized.err == null;
+            T deserialized = JsonSerializer.Deserialize<T>(data);
+            bool successful = deserialized.err == null;
             if (successful)
                 return deserialized;
             else throw new Exception(deserialized.err ?? String.Format("There was an error deserializing the returned data. ({0})", data));
-            // I've always wanted to use ??.  And now I have!  :D
         }
+
         /// <summary>
         /// Calls <see cref="TTAPI.TTWebInterface.Request"/> and interprets the returned data as <see cref="T"/>.  Throws an exception if there was an error returned.
         /// </summary>
@@ -45,16 +46,20 @@ namespace TTAPI
         /// <returns>Whether or not the request was successful.</returns>
         public static bool Request<T>(APICall call, out T results, string method = "POST") where T : Command
         {
-            string data = Request(call, method);
-            bool successful = data.Substring(0, 5) == "[true";
-            data = data.Remove(0, successful ? 7 : 8);
-            data = data.Remove(data.Length - 1);
+            string data = RequestAsync(call, method).GetAwaiter().GetResult();
             data = Command.Preprocess(typeof(T), data);
-            T deserialized = serializer.Deserialize<T>(data);
-            successful &= deserialized.err == null;
-
-            results = deserialized;
-            return successful;
+            try
+            {
+                T deserialized = JsonSerializer.Deserialize<T>(data);
+                bool successful = deserialized.err == null;
+                results = deserialized;
+                return successful;
+            }
+            catch (Exception ex)
+            {
+                results = null;
+                return false;
+            }
         }
 
         /// <summary>
@@ -63,50 +68,36 @@ namespace TTAPI
         /// <param name="call">The API call that we will attempt to execute.</param>
         /// <param name="method">The calling method.  Either POST or GET.</param>
         /// <returns>The returned data from the call.  Usually in the form of an array, [successful, {objectData}]</returns>
-        public static string Request(APICall call, string method = "POST")
+        public static async Task<string> RequestAsync(APICall call, string method = "POST")
         {
             string calling = string.Format("http://turntable.fm/api/{0}", call.api);
             if (call.CustomInterfaceAddress != null)
                 calling = call.CustomInterfaceAddress;
 
-            Type actualCall = call.GetType();
-            FieldInfo[] infos = actualCall.GetFields();
-            string[] dataEntries = new string[infos.Length+1];
-            dataEntries[infos.Length] = "client=web";
-            for (int i = 0; i < infos.Length; ++i)
-            {
-                FieldInfo field = infos[i];
-                string fieldData = field.GetValue(call).ToString();
-                fieldData = fieldData.Replace("+", "%2B");
-                string formatted = string.Format("{0}={1}", field.Name, fieldData);
-                dataEntries[i] = formatted;
-            }
-            string serializedData = string.Join("&", dataEntries);
-            
-            WebRequest req;
-            if (method != "GET")
-            {   req = WebRequest.Create(calling);
-                req.Method = method;
-                req.ContentType = "application/x-www-form-urlencoded";
+            var variables = call
+                    .GetType()
+                    .GetProperties()
+                    .Select(property => new Tuple<string, object>(property.Name, property.GetValue(call)))
+                    .Where(property => property.Item2 != null)
+                    .ToDictionary(property => property.Item1, property => property.Item2.ToString());
 
-                using (StreamWriter input = new StreamWriter(req.GetRequestStream()))
-                    input.Write(serializedData);
+            variables.Add("client", "web");
+
+            FormUrlEncodedContent content = new FormUrlEncodedContent(variables);
+            HttpResponseMessage response = null;
+            if (method != "GET")
+            {
+                response = await client.PostAsync(calling, content);
             }
             else
             {
-                calling = string.Format("{0}?{1}", calling, serializedData);
-                req = WebRequest.Create(calling);
+                calling = string.Format("{0}?{1}", calling, content.ToString());
+                response = await client.GetAsync(calling);
             }
 
-            //byte[] data = UTF8Encoding.UTF8.GetBytes(builder.ToString());
-            //input.Write(data, 0, data.Length);
-
-            WebResponse res = req.GetResponse();
-            string outputData = null;
-            using (StreamReader output = new StreamReader(res.GetResponseStream()))
-                outputData = output.ReadToEnd();
-
-            return outputData;
+            response.EnsureSuccessStatusCode();
+            var responseData = await response.Content.ReadAsStringAsync();
+            return responseData;
         }
     }
 }

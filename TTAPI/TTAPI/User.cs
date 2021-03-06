@@ -1,19 +1,19 @@
 ﻿using System;
-using System.Web.Script.Serialization;
+using System.Text.Json.Serialization;
 using TTAPI.Recv;
 
 namespace TTAPI
 {
     public class User : Command
     {
-        public string name,
-                      userid,
-                      laptop,
-                      laptop_version,
-                      status,
-                      fbid,
-                      twitterid;
-        [ScriptIgnore]
+        public string name { get; set; }
+        public string userid { get; set; }
+        public string laptop { get; set; }
+        public string laptop_version { get; set; }
+        public string status { get; set; }
+        public string fbid { get; set; }
+        public string twitterid { get; set; }
+        [JsonIgnore]
         public ACL aclReadable
         {
             get
@@ -21,12 +21,12 @@ namespace TTAPI
                 return (ACL)(int)Math.Round(acl, 0);
             }
         }
-        public double acl;
-        public int fans,
-                   points,
-                   avatarid;
-        public double created;
-        public bool has_tt_password;
+        public double acl { get; set; }
+        public int fans { get; set; }
+        public int points { get; set; }
+        public int avatarid { get; set; }
+        public double created { get; set; }
+        public bool has_tt_password { get; set; }
 
         public override string ToString()
         {
@@ -36,7 +36,10 @@ namespace TTAPI
 
     public class UserProfile : User
     {
-        public string about, website, topartists, hangout;
+        public string about { get; set; }
+        public string website { get; set; }
+        public string topartists { get; set; }
+        public string hangout { get; set; }
     }
 
     public enum ACL
@@ -48,13 +51,15 @@ namespace TTAPI
 
     public class AvatarRequirements
     {
-        public int[] avatarids;
-        public int min;
-        public int acl;
+        public int[] avatarids { get; set; }
+        public int min { get; set; }
+        public int acl { get; set; }
     }
 
     public class UserPresence
     {
-        public string status, userid;
+        public string status { get; set; }
+
+        public string userid { get; set; }
     }
 }

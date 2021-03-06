@@ -1,11 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TTAPI", "TTAPI\TTAPI.csproj", "{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "websocket-sharp", "websocket-sharp\websocket-sharp.csproj", "{B357BAC7-529E-4D81-A0D2-71041B19C8DE}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TTAPI", "TTAPI\TTAPI.csproj", "{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{548A71C2-A4F1-4D48-9A25-704E1E811004}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hashtag-Amy", "Hashtag-Amy\Hashtag-Amy.csproj", "{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,8 +31,8 @@ Global
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug_Ubuntu|x86.ActiveCfg = Debug|x86
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug_Ubuntu|x86.Build.0 = Debug|x86
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug|x86.ActiveCfg = Debug|x86
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Debug|x86.Build.0 = Debug|x86
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Release_Ubuntu|Any CPU.ActiveCfg = Release|x86
@@ -43,28 +45,35 @@ Global
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Release|Mixed Platforms.Build.0 = Release|x86
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Release|x86.ActiveCfg = Release|x86
 		{9FF37F0D-901D-4577-ACFF-1C1FB084FB05}.Release|x86.Build.0 = Release|x86
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug_Ubuntu|Any CPU.Build.0 = Debug_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug_Ubuntu|Mixed Platforms.ActiveCfg = Debug_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug_Ubuntu|Mixed Platforms.Build.0 = Debug_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug_Ubuntu|x86.ActiveCfg = Debug_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release_Ubuntu|Any CPU.ActiveCfg = Release_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release_Ubuntu|Any CPU.Build.0 = Release_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release_Ubuntu|Mixed Platforms.ActiveCfg = Release_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release_Ubuntu|Mixed Platforms.Build.0 = Release_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release_Ubuntu|x86.ActiveCfg = Release_Ubuntu|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug_Ubuntu|Any CPU.Build.0 = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug_Ubuntu|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug_Ubuntu|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug_Ubuntu|x86.ActiveCfg = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug_Ubuntu|x86.Build.0 = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Debug|x86.Build.0 = Debug|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release_Ubuntu|Any CPU.ActiveCfg = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release_Ubuntu|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release_Ubuntu|Mixed Platforms.Build.0 = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release_Ubuntu|x86.ActiveCfg = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release_Ubuntu|x86.Build.0 = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A3EC4F0-9B4C-46B5-AE57-9E491DE24961}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B248A9F2-E9B2-4118-9684-AB4847C0ED33}
 	EndGlobalSection
 EndGlobal
