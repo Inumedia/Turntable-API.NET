@@ -94,7 +94,10 @@ namespace TTAPI
             return TTSock.isConnected;
         }
 
-        public void Vote(string vote) => Send(new RoomVote(vote, roomId, roomInformation.metadata.current_song._id, random));
+        public void Vote(string vote)
+        {
+            Send(new RoomVote(vote, roomId, roomInformation.metadata.current_song._id, random));
+        }
 
         public virtual void JoinedRoom()
         {

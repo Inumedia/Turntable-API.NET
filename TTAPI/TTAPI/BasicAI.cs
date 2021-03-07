@@ -24,6 +24,8 @@ namespace TTAPI
         public static void NewSong(TTClient instance, SongChange roomInfo)
         {
             instance.UpdateRoomInformation(roomInfo.room);
+
+            instance.Vote("up");
         }
 
         [Handles("nosong")]

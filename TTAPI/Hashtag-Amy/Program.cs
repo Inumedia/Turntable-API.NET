@@ -17,7 +17,7 @@ namespace Hashtag_Amy
         static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
+                .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .WriteTo.File($"logs/amy.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();

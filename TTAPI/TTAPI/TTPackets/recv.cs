@@ -145,7 +145,7 @@ namespace TTAPI.Recv
 
     public class SongChange : Command
     {
-        public Room room;
+        public Room room { get; set; }
     }
 
     [CommandName("endsong")]

@@ -58,7 +58,7 @@ namespace TTAPI
                         Delegate genericHandler = Delegate.CreateDelegate(typeof(Handler<>).MakeGenericType(actualType), method);
                         Handler hardHandler = new Handler((t, o) =>
                         {
-                            if (o.GetType() == actualType)
+                            if (actualType.IsAssignableFrom(o.GetType()))
                                 genericHandler.DynamicInvoke(t, o);
                         });
 
